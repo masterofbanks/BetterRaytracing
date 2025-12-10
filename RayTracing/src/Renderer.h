@@ -1,7 +1,9 @@
 #pragma once
 #include "Walnut/Image.h"
+#include "Ray.h"
 #include <memory>
 #include <glm/glm.hpp>
+#include "HIttable.h"
 
 /// <summary>
 /// Class that takes a scene description as an input, and produces the pixels of an image as an output.
@@ -33,7 +35,29 @@ public:
 	}
 
 private:
+	/// <summary>
+	/// For a given camera coordinate, see if a ray shot from the camera's origin through a pixel as hit a sphere located at 0,0,0
+	/// </summary>
+	/// <param name="coord"></param>
+	/// <returns>the color of the collision; red it there was a collision, black if there was not</returns>
 	uint32_t PerPixel(glm::vec2 coord);
+
+	/// <summary>
+	/// Detects whether a ray has hit the sphere, and stores the results in a hit records (t value, point, and normal)
+	/// </summary>
+	/// <param name="ray"></param>
+	/// <param name="radius"></param>
+	/// <param name="sphereCenter"></param>
+	/// <param name="hitRecord"></param>
+	/// <returns>Whether or not the ray hit the sphere</returns>
+	bool HitSphere(Ray& ray, float radius, glm::vec3 sphereCenter, Hit& hitRecord);
+
+	/// <summary>
+	/// Converts a color vector stored with rgb values between 0 and 1 to a 32 bit integer (RGBA format)
+	/// </summary>
+	/// <param name="color"></param>
+	/// <returns>the 32 bit form of the color</returns>
+	uint32_t ConvertColorVectorToInt(glm::vec3 color);
 private:
 	std::shared_ptr<Walnut::Image> m_FinalImage;
 	uint32_t* m_ImageData = nullptr;

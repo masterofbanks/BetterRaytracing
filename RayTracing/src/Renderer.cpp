@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "Walnut/Random.h"
-
+#include <iostream>
 
 /// <summary>
 /// This method should get called whenever an image needs to be resized. Ex: viewport for our camera gets reized in the GUI
@@ -62,23 +62,78 @@ void Renderer::Render() {
 /// <returns>the color of the collision; red it there was a collision, black if there was not</returns>
 uint32_t Renderer::PerPixel(glm::vec2 coord)
 {
-	glm::vec3 origin = glm::vec3(0, 0, -2);
+	//shoot a ray from the camera origin through one of the pixel "windows" of the 
+	glm::vec3 origin = glm::vec3(0, 0, 0);
 	glm::vec3 direction = glm::vec3(coord.x, coord.y, -1);
+	Ray ray = Ray(origin, direction);
 
+	//light values
+	float k_diffuse = 0.95f;
+	glm::vec3 lightOrigin = glm::vec3(-5, -5, -5);
+
+	//sphere values
 	float radius = 0.5f;
-	glm::vec3 sphereCenter = glm::vec3(0, 0, 0);
+	glm::vec3 sphereCenter = glm::vec3(0, 0, 1);
+	glm::vec3 sphereColor = glm::vec3(1, 0, 0);
+	
+	Hit tempHitRecord;
+	if (HitSphere(ray, radius, sphereCenter, tempHitRecord)) {
+		glm::vec3 vectorToLight = glm::normalize(lightOrigin = tempHitRecord.p);
+		float fallOffFactor = glm::dot(vectorToLight, tempHitRecord.normal);
+		glm::vec3 outputColor = k_diffuse * fallOffFactor * sphereColor;
+		return ConvertColorVectorToInt(outputColor);
 
-	float a = glm::dot(direction, direction);
-	float b = -2 * glm::dot(direction, sphereCenter - origin);
-	float c = glm::dot((sphereCenter - origin), (sphereCenter - origin)) - radius * radius;
-	float discriminant = b * b - 4 * a * c;
-	if (discriminant >= 0) {
-		return 0xff0000ff;
 	}
 
 	return 0x0000000;
 	
 }
+
+/// <summary>
+/// Detects whether a ray has hit the sphere, and stores the results in a hit records (t value, point, and normal)
+/// </summary>
+/// <param name="ray"></param>
+/// <param name="radius"></param>
+/// <param name="sphereCenter"></param>
+/// <param name="hitRecord"></param>
+/// <returns>Whether or not the ray hit the sphere</returns>
+bool Renderer::HitSphere(Ray& ray, float radius, glm::vec3 sphereCenter, Hit& hitRecord)
+{
+	float a = glm::dot(ray.direction, ray.direction);
+	float b = -2 * glm::dot(ray.direction, sphereCenter - ray.origin);
+	float c = glm::dot((sphereCenter - ray.origin), (sphereCenter - ray.origin)) - radius * radius;
+	float discriminant = b * b - 4 * a * c;
+	if (discriminant < 0) {
+		return false;
+	}
+
+	hitRecord.t = (-b - std::sqrt(discriminant)) / (2.0f * a);
+	hitRecord.p = ray.CalculatePoint(hitRecord.t);
+	hitRecord.normal = glm::normalize(hitRecord.p - sphereCenter);
+
+	return true;
+}
+
+/// <summary>
+/// Converts a color vector stored with rgb values between 0 and 1 to a 32 bit integer (RGBA format)
+/// </summary>
+/// <param name="color"></param>
+/// <returns>the 32 bit form of the color</returns>
+uint32_t Renderer::ConvertColorVectorToInt(glm::vec3 color)
+{
+	uint8_t r = glm::clamp(color.x * 255.0f, 0.0f, 255.0f);
+	uint8_t g = glm::clamp(color.y * 255.0f, 0.0f, 255.0f);
+	uint8_t b = glm::clamp(color.z * 255.0f, 0.0f, 255.0f);
+	uint8_t a = 255;
+
+	return
+		(uint32_t(r) << 24) |
+		(uint32_t(g) << 16) |
+		(uint32_t(b) << 8) |
+		uint32_t(a);
+
+}
+
 
 
 
