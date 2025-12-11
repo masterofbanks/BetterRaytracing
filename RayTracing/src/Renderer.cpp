@@ -35,6 +35,7 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 /// </summary>
 void Renderer::Render() {
 	
+	float aspectRatio = m_FinalImage->GetWidth() / (float)m_FinalImage->GetHeight();
 	//loop through ys on the outside to be more friendly to the cpu cache
 	//cpu can seach through the horizontally placed pixels faster
 	for (uint32_t y = 0; y < m_FinalImage->GetHeight(); y++) 
@@ -43,6 +44,8 @@ void Renderer::Render() {
 		{
 			glm::vec2 coord = { (float)x / (float)m_FinalImage->GetWidth(), (float)y / (float)m_FinalImage->GetHeight() };
 			coord = coord * 2.0f - 1.0f; // -1 -> 1
+			coord.x *= aspectRatio;
+
 			m_ImageData[x + y * m_FinalImage->GetWidth()] = PerPixel(coord);
 
 		}
@@ -69,23 +72,23 @@ uint32_t Renderer::PerPixel(glm::vec2 coord)
 
 	//light values
 	float k_diffuse = 0.95f;
-	glm::vec3 lightOrigin = glm::vec3(-5, -5, -5);
+	glm::vec3 lightOrigin = glm::vec3(5, -5, 5);
 
 	//sphere values
 	float radius = 0.5f;
 	glm::vec3 sphereCenter = glm::vec3(0, 0, 1);
-	glm::vec3 sphereColor = glm::vec3(1, 0, 0);
+	glm::vec3 sphereColor = glm::vec3(0, 1, 1);
 	
 	Hit tempHitRecord;
 	if (HitSphere(ray, radius, sphereCenter, tempHitRecord)) {
-		glm::vec3 vectorToLight = glm::normalize(lightOrigin = tempHitRecord.p);
+		glm::vec3 vectorToLight = glm::normalize(lightOrigin - tempHitRecord.p);
 		float fallOffFactor = glm::dot(vectorToLight, tempHitRecord.normal);
 		glm::vec3 outputColor = k_diffuse * fallOffFactor * sphereColor;
 		return ConvertColorVectorToInt(outputColor);
 
 	}
 
-	return 0x0000000;
+	return 0xff000000;
 	
 }
 
@@ -107,6 +110,7 @@ bool Renderer::HitSphere(Ray& ray, float radius, glm::vec3 sphereCenter, Hit& hi
 		return false;
 	}
 
+	//only record the closer collision for now
 	hitRecord.t = (-b - std::sqrt(discriminant)) / (2.0f * a);
 	hitRecord.p = ray.CalculatePoint(hitRecord.t);
 	hitRecord.normal = glm::normalize(hitRecord.p - sphereCenter);
@@ -121,16 +125,17 @@ bool Renderer::HitSphere(Ray& ray, float radius, glm::vec3 sphereCenter, Hit& hi
 /// <returns>the 32 bit form of the color</returns>
 uint32_t Renderer::ConvertColorVectorToInt(glm::vec3 color)
 {
-	uint8_t r = glm::clamp(color.x * 255.0f, 0.0f, 255.0f);
-	uint8_t g = glm::clamp(color.y * 255.0f, 0.0f, 255.0f);
-	uint8_t b = glm::clamp(color.z * 255.0f, 0.0f, 255.0f);
-	uint8_t a = 255;
+	uint8_t r = uint8_t(glm::clamp(color.r * 255.0f, 0.0f, 255.0f));
+	uint8_t g = uint8_t(glm::clamp(color.g * 255.0f, 0.0f, 255.0f));
+	uint8_t b = uint8_t(glm::clamp(color.b * 255.0f, 0.0f, 255.0f));
+
+	uint8_t a = 255; // alpha = 1.0f
 
 	return
-		(uint32_t(r) << 24) |
-		(uint32_t(g) << 16) |
-		(uint32_t(b) << 8) |
-		uint32_t(a);
+		(uint32_t(a) << 24) |
+		(uint32_t(b) << 16) |
+		(uint32_t(g) << 8) |
+		(uint32_t(r));
 
 }
 
