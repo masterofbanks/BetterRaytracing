@@ -2,6 +2,7 @@
 #include "Walnut/Random.h"
 #include <iostream>
 
+
 /// <summary>
 /// This method should get called whenever an image needs to be resized. Ex: viewport for our camera gets reized in the GUI
 /// </summary>
@@ -45,8 +46,9 @@ void Renderer::Render() {
 			glm::vec2 coord = { (float)x / (float)m_FinalImage->GetWidth(), (float)y / (float)m_FinalImage->GetHeight() };
 			coord = coord * 2.0f - 1.0f; // -1 -> 1
 			coord.x *= aspectRatio;
-
-			m_ImageData[x + y * m_FinalImage->GetWidth()] = PerPixel(coord);
+			glm::vec4 color = PerPixel(coord);
+			color = glm::clamp(color, glm::vec4(0), glm::vec4(1.0f));
+			m_ImageData[x + y * m_FinalImage->GetWidth()] = ConvertColorVectorToInt(color);
 
 		}
 	}
@@ -63,7 +65,7 @@ void Renderer::Render() {
 /// </summary>
 /// <param name="coord"></param>
 /// <returns>the color of the collision; red it there was a collision, black if there was not</returns>
-uint32_t Renderer::PerPixel(glm::vec2 coord)
+glm::vec4 Renderer::PerPixel(glm::vec2 coord)
 {
 	//shoot a ray from the camera origin through one of the pixel "windows" of the 
 	glm::vec3 origin = glm::vec3(0, 0, 0);
@@ -77,18 +79,19 @@ uint32_t Renderer::PerPixel(glm::vec2 coord)
 	//sphere values
 	float radius = 0.5f;
 	glm::vec3 sphereCenter = glm::vec3(0, 0, 1);
-	glm::vec3 sphereColor = glm::vec3(0, 1, 1);
+	glm::vec3 sphereColor = glm::vec3(1, 1, 1);
 	
 	Hit tempHitRecord;
 	if (HitSphere(ray, radius, sphereCenter, tempHitRecord)) {
 		glm::vec3 vectorToLight = glm::normalize(lightOrigin - tempHitRecord.p);
 		float fallOffFactor = glm::dot(vectorToLight, tempHitRecord.normal);
 		glm::vec3 outputColor = k_diffuse * fallOffFactor * sphereColor;
-		return ConvertColorVectorToInt(outputColor);
+		return glm::vec4(outputColor, 1);
 
 	}
 
-	return 0xff000000;
+	return glm::vec4(0, 0, 0, 1);
+
 	
 }
 
@@ -123,13 +126,13 @@ bool Renderer::HitSphere(Ray& ray, float radius, glm::vec3 sphereCenter, Hit& hi
 /// </summary>
 /// <param name="color"></param>
 /// <returns>the 32 bit form of the color</returns>
-uint32_t Renderer::ConvertColorVectorToInt(glm::vec3 color)
+uint32_t Renderer::ConvertColorVectorToInt(glm::vec4& color)
 {
-	uint8_t r = uint8_t(glm::clamp(color.r * 255.0f, 0.0f, 255.0f));
-	uint8_t g = uint8_t(glm::clamp(color.g * 255.0f, 0.0f, 255.0f));
-	uint8_t b = uint8_t(glm::clamp(color.b * 255.0f, 0.0f, 255.0f));
+	uint8_t r = uint8_t(color.r * 255.0f);
+	uint8_t g = uint8_t(color.g * 255.0f);
+	uint8_t b = uint8_t(color.b * 255.0f);
 
-	uint8_t a = 255; // alpha = 1.0f
+	uint8_t a = uint8_t(color.a * 255.0f); 
 
 	return
 		(uint32_t(a) << 24) |

@@ -40,7 +40,7 @@ private:
 	/// </summary>
 	/// <param name="coord"></param>
 	/// <returns>the color of the collision; red it there was a collision, black if there was not</returns>
-	uint32_t PerPixel(glm::vec2 coord);
+	glm::vec4 PerPixel(glm::vec2 coord);
 
 	/// <summary>
 	/// Detects whether a ray has hit the sphere, and stores the results in a hit records (t value, point, and normal)
@@ -57,7 +57,7 @@ private:
 	/// </summary>
 	/// <param name="color"></param>
 	/// <returns>the 32 bit form of the color</returns>
-	uint32_t ConvertColorVectorToInt(glm::vec3 color);
+	uint32_t ConvertColorVectorToInt(glm::vec4& color);
 private:
 	std::shared_ptr<Walnut::Image> m_FinalImage;
 	uint32_t* m_ImageData = nullptr;
