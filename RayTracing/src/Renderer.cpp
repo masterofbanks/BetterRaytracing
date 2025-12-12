@@ -74,18 +74,20 @@ glm::vec4 Renderer::PerPixel(glm::vec2 coord)
 
 	//light values
 	float k_diffuse = 0.95f;
-	glm::vec3 lightOrigin = glm::vec3(5, -5, 5);
+	float k_ambient = 0.4f;
+	
+	glm::vec3 lightOrigin = glm::vec3(3, -3, 10);
 
 	//sphere values
 	float radius = 0.5f;
-	glm::vec3 sphereCenter = glm::vec3(0, 0, 1);
-	glm::vec3 sphereColor = glm::vec3(1, 1, 1);
+	glm::vec3 sphereCenter = glm::vec3(0, 0, 3);
+	glm::vec3 sphereColor = glm::vec3(0.85f, 0.32f, 0.1f);
 	
 	Hit tempHitRecord;
 	if (HitSphere(ray, radius, sphereCenter, tempHitRecord)) {
 		glm::vec3 vectorToLight = glm::normalize(lightOrigin - tempHitRecord.p);
-		float fallOffFactor = glm::dot(vectorToLight, tempHitRecord.normal);
-		glm::vec3 outputColor = k_diffuse * fallOffFactor * sphereColor;
+		float fallOffFactor = std::max(0.0f, glm::dot(tempHitRecord.normal, vectorToLight));
+		glm::vec3 outputColor = k_ambient * sphereColor + (k_diffuse * fallOffFactor) * sphereColor;
 		return glm::vec4(outputColor, 1);
 
 	}
