@@ -2,6 +2,15 @@
 #include "Walnut/Random.h"
 #include <iostream>
 
+Renderer::Renderer()
+{
+	//Sphere* redSphere = new Sphere(0.5f, glm::vec3(-1,0,3), glm::vec3(1,1,1));
+	Sphere* blueSphere = new Sphere(0.5f, glm::vec3(0,0,3), glm::vec3(0, 0, 0.7f));
+	Sphere* otherBlueSphere = new Sphere(2.0f, glm::vec3(0,0,10), glm::vec3(0, 0.7f, 0.7f));
+	//scene.push_back(redSphere);
+	scene.push_back(blueSphere);
+	scene.push_back(otherBlueSphere);
+}
 
 /// <summary>
 /// This method should get called whenever an image needs to be resized. Ex: viewport for our camera gets reized in the GUI
@@ -78,16 +87,14 @@ glm::vec4 Renderer::PerPixel(glm::vec2 coord)
 	
 	glm::vec3 lightOrigin = glm::vec3(3, -3, 10);
 
-	//sphere values
-	float radius = 0.5f;
-	glm::vec3 sphereCenter = glm::vec3(0, 0, 3);
-	glm::vec3 sphereColor = glm::vec3(0.85f, 0.32f, 0.1f);
 	
 	Hit tempHitRecord;
-	if (HitSphere(ray, radius, sphereCenter, tempHitRecord)) {
+	float minimumCheckDistance = 0.001f;
+	float maxCheckDistance = 999999999.0f;
+	if (HitScene(ray, minimumCheckDistance, maxCheckDistance, tempHitRecord)) {
 		glm::vec3 vectorToLight = glm::normalize(lightOrigin - tempHitRecord.p);
 		float fallOffFactor = std::max(0.0f, glm::dot(tempHitRecord.normal, vectorToLight));
-		glm::vec3 outputColor = k_ambient * sphereColor + (k_diffuse * fallOffFactor) * sphereColor;
+		glm::vec3 outputColor = k_ambient * tempHitRecord.colorOfHit + (k_diffuse * fallOffFactor) * tempHitRecord.colorOfHit;
 		return glm::vec4(outputColor, 1);
 
 	}
@@ -98,29 +105,28 @@ glm::vec4 Renderer::PerPixel(glm::vec2 coord)
 }
 
 /// <summary>
-/// Detects whether a ray has hit the sphere, and stores the results in a hit records (t value, point, and normal)
+/// Detects whether a ray has hit any object in the scene, and stores the closest result in a hit record (t value, point, and normal)
 /// </summary>
 /// <param name="ray"></param>
-/// <param name="radius"></param>
-/// <param name="sphereCenter"></param>
+/// <param name="ray_tmin"></param>
+/// <param name="ray_tmax"></param>
 /// <param name="hitRecord"></param>
-/// <returns>Whether or not the ray hit the sphere</returns>
-bool Renderer::HitSphere(Ray& ray, float radius, glm::vec3 sphereCenter, Hit& hitRecord)
+/// <returns>Whether or not the ray hit the scene, and stores the hit information in a Hit structure</returns>
+bool Renderer::HitScene(Ray& ray, float ray_tmin, float ray_tmax, Hit& hitRecord)
 {
-	float a = glm::dot(ray.direction, ray.direction);
-	float b = -2 * glm::dot(ray.direction, sphereCenter - ray.origin);
-	float c = glm::dot((sphereCenter - ray.origin), (sphereCenter - ray.origin)) - radius * radius;
-	float discriminant = b * b - 4 * a * c;
-	if (discriminant < 0) {
-		return false;
+	Hit tempRecord;
+	bool hitAnything = false;
+	float closestSoFar = ray_tmax;
+	for (int i = 0; i < scene.size(); i++) {
+		if (scene[i]->DetectHit(ray, ray_tmin, closestSoFar, tempRecord)) {
+			hitAnything = true;
+			closestSoFar = tempRecord.t;
+			hitRecord = tempRecord;
+
+		}
 	}
 
-	//only record the closer collision for now
-	hitRecord.t = (-b - std::sqrt(discriminant)) / (2.0f * a);
-	hitRecord.p = ray.CalculatePoint(hitRecord.t);
-	hitRecord.normal = glm::normalize(hitRecord.p - sphereCenter);
-
-	return true;
+	return hitAnything;
 }
 
 /// <summary>

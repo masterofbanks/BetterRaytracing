@@ -1,16 +1,18 @@
 #pragma once
 #include "Walnut/Image.h"
 #include "Ray.h"
+#include "Sphere.h"
 #include <memory>
 #include <glm/glm.hpp>
-#include "HIttable.h"
+#include "Hit.h"
+#include <vector>
 
 /// <summary>
 /// Class that takes a scene description as an input, and produces the pixels of an image as an output.
 /// </summary>
 class Renderer {
 public:
-	Renderer() = default;
+	Renderer();
 
 	/// <summary>
 	/// This method should get called whenever an image needs to be resized. Ex: viewport for our camera gets reized in the GUI
@@ -43,14 +45,12 @@ private:
 	glm::vec4 PerPixel(glm::vec2 coord);
 
 	/// <summary>
-	/// Detects whether a ray has hit the sphere, and stores the results in a hit records (t value, point, and normal)
+	/// Detects whether a ray has hit any object in the scene, and stores the closest result in a hit record (t value, point, and normal)
 	/// </summary>
 	/// <param name="ray"></param>
-	/// <param name="radius"></param>
-	/// <param name="sphereCenter"></param>
 	/// <param name="hitRecord"></param>
-	/// <returns>Whether or not the ray hit the sphere</returns>
-	bool HitSphere(Ray& ray, float radius, glm::vec3 sphereCenter, Hit& hitRecord);
+	/// <returns>Whether or not the ray hit the Scene</returns>
+	bool HitScene(Ray& ray, float ray_tmin, float ray_tmax, Hit& hitRecord);
 
 	/// <summary>
 	/// Converts a color vector stored with rgb values between 0 and 1 to a 32 bit integer (RGBA format)
@@ -61,4 +61,5 @@ private:
 private:
 	std::shared_ptr<Walnut::Image> m_FinalImage;
 	uint32_t* m_ImageData = nullptr;
+	std::vector<Surface*> scene;
 };
