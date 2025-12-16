@@ -27,9 +27,9 @@ bool Sphere::DetectHit(Ray& ray, float t_min, float t_max, Hit& hitRecord)
 
 	//only record the closer collision for now
 	float testT = (-b - std::sqrt(discriminant)) / (2.0f * a);
-	/*if (testT <= t_min || testT >= t_max) {
+	if (testT > t_max) {
 		return false;
-	}*/
+	}
 	hitRecord.t = testT;
 	hitRecord.p = ray.CalculatePoint(hitRecord.t);
 	hitRecord.normal = glm::normalize(hitRecord.p - center);

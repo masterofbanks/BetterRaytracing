@@ -5,11 +5,14 @@
 Renderer::Renderer()
 {
 	//Sphere* redSphere = new Sphere(0.5f, glm::vec3(-1,0,3), glm::vec3(1,1,1));
-	Sphere* blueSphere = new Sphere(0.5f, glm::vec3(0,0,3), glm::vec3(0, 0, 0.7f));
-	Sphere* otherBlueSphere = new Sphere(2.0f, glm::vec3(0,0,10), glm::vec3(0, 0.7f, 0.7f));
-	//scene.push_back(redSphere);
+	Sphere* blueSphere = new Sphere(0.5f, glm::vec3(0,0,-3), glm::vec3(0, 0, 0.7f));
+	Sphere* redSphere = new Sphere(3.0f, glm::vec3(0,0,-10), glm::vec3(0.7f, 0, 0));
+	Sphere* bigSphere = new Sphere(100, glm::vec3(0, -125, -25), glm::vec3(0, 0.4f, 0));
+
+	scene.push_back(redSphere);
 	scene.push_back(blueSphere);
-	scene.push_back(otherBlueSphere);
+	scene.push_back(bigSphere);
+
 }
 
 /// <summary>
@@ -83,9 +86,9 @@ glm::vec4 Renderer::PerPixel(glm::vec2 coord)
 
 	//light values
 	float k_diffuse = 0.95f;
-	float k_ambient = 0.4f;
+	float k_ambient = 0.0f;
 	
-	glm::vec3 lightOrigin = glm::vec3(3, -3, 10);
+	glm::vec3 lightOrigin = glm::vec3(3, 3, 5);
 
 	
 	Hit tempHitRecord;
