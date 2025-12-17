@@ -1,10 +1,10 @@
 #include "Sphere.h"
 #include <glm/glm.hpp>
-Sphere::Sphere(float r, glm::vec3 cent, glm::vec3 col)
+Sphere::Sphere(float r, glm::vec3 cent, Material& m)
 {
 	radius = r;
 	center = cent;
-	color = col;
+	mat = m;
 }
 
 /// <summary>
@@ -33,7 +33,7 @@ bool Sphere::DetectHit(Ray& ray, float t_min, float t_max, Hit& hitRecord)
 	hitRecord.t = testT;
 	hitRecord.p = ray.CalculatePoint(hitRecord.t);
 	hitRecord.normal = glm::normalize(hitRecord.p - center);
-	hitRecord.colorOfHit = color;
+	hitRecord.material = mat;
 	return true;
 }
 

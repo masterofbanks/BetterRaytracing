@@ -6,13 +6,16 @@
 Renderer::Renderer()
 {
 	//Sphere* redSphere = new Sphere(0.5f, glm::vec3(-1,0,3), glm::vec3(1,1,1));
-	Sphere* blueSphere = new Sphere(0.5f, glm::vec3(1,0,-3), glm::vec3(0, 0, 0.7f));
-	Sphere* redSphere = new Sphere(3.0f, glm::vec3(0,0,-10), glm::vec3(0.7f, 0, 0));
-	Sphere* bigSphere = new Sphere(100, glm::vec3(0, -105, -25), glm::vec3(0, 0.4f, 0));
+	Material blueMaterial = Material(0.95f, 0.95f, glm::vec3(0, 0, 0.7f));
+	Sphere* blueSphere = new Sphere(0.5f, glm::vec3(1,0,-3), blueMaterial);
+
+	Material redMaterial = Material(0.95f, 0.4f, glm::vec3(0.7f, 0, 0));
+	Sphere* redSphere = new Sphere(3.0f, glm::vec3(0,0,-10), redMaterial);
+	//Sphere* bigSphere = new Sphere(100, glm::vec3(0, -105, -25), glm::vec3(0, 0.4f, 0));
 
 	scene.push_back(redSphere);
 	scene.push_back(blueSphere);
-	scene.push_back(bigSphere);
+	//scene.push_back(bigSphere);
 
 }
 
@@ -75,20 +78,18 @@ void Renderer::Render(const Camera& camera) {
 
 
 /// <summary>
-/// For a given camera coordinate, see if a ray shot from the camera's origin through a pixel as hit a sphere located at 0,0,0
+/// For a given camera coordinate, see if a ray shot from the camera's origin through a pixel has hit the scene
 /// </summary>
 /// <param name="coord"></param>
-/// <returns>the color of the collision; red it there was a collision, black if there was not</returns>
+/// <returns>the color of the collision; black if there was not any collision</returns>
 glm::vec4 Renderer::TraceRay(Ray& ray)
 {
 	//light values
-	float k_diffuse = 0.95f;
 	float k_ambient = 0.0f;
-	float k_phong = 0.95f;
-	int phongExponent = 32;
+	int phongExponent = 256;
 	glm::vec3 colorOfLight = glm::vec3(1, 1, 1);
 	
-	glm::vec3 lightOrigin = glm::vec3(3, 3, 5);
+	glm::vec3 lightOrigin = glm::vec3(10000, 10000, 10000);
 
 	
 	Hit tempHitRecord;
@@ -98,17 +99,24 @@ glm::vec4 Renderer::TraceRay(Ray& ray)
 		glm::vec3 vectorToLight = glm::normalize(lightOrigin - tempHitRecord.p);
 
 		//diffuse shading factor = k_f * n • l
-		float diffuseFactor = k_diffuse * std::max(0.0f, glm::dot(tempHitRecord.normal, vectorToLight));
+		float diffuseFactor = tempHitRecord.material.k_diffuse * std::max(0.0f, glm::dot(tempHitRecord.normal, vectorToLight));
 
 		//e = vector to camera from hit point
 		//h = half vector = (e + l)/||e + l||
 		glm::vec3 e = ray.origin - tempHitRecord.p;
-		glm::vec3 h = (e + vectorToLight) / glm::length(e + vectorToLight);
+		glm::vec3 h = glm::normalize(e + vectorToLight);
+
+		//r = -l + 2(l • n)n
+		glm::vec3 r = -vectorToLight + 2 * glm::dot(vectorToLight, tempHitRecord.normal) * tempHitRecord.normal;
+		r = glm::normalize(r);
 
 		//phong shading factor = k_p * (h • n)^p
-		float phongShading = k_phong * std::pow(glm::dot(h, tempHitRecord.normal), phongExponent);
+		float phongShading = tempHitRecord.material.k_phong * std::pow(glm::dot(h, tempHitRecord.normal), phongExponent);
 
-		glm::vec3 outputColor = (k_ambient + diffuseFactor ) * tempHitRecord.colorOfHit + phongShading * colorOfLight;
+		//other phong shading factor = k_p * max(0,e • r)^p
+		//float phongShading = k_phong * std::pow(std::max(0.0f, glm::dot(e, r)), phongExponent);
+
+		glm::vec3 outputColor = (k_ambient + diffuseFactor ) * tempHitRecord.material.albedo + phongShading * colorOfLight;
 		return glm::vec4(outputColor, 1);
 
 	}
