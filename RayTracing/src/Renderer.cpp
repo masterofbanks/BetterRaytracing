@@ -5,9 +5,9 @@
 Renderer::Renderer()
 {
 	//Sphere* redSphere = new Sphere(0.5f, glm::vec3(-1,0,3), glm::vec3(1,1,1));
-	Sphere* blueSphere = new Sphere(0.5f, glm::vec3(0,0,-3), glm::vec3(0, 0, 0.7f));
+	Sphere* blueSphere = new Sphere(0.5f, glm::vec3(1,0,-3), glm::vec3(0, 0, 0.7f));
 	Sphere* redSphere = new Sphere(3.0f, glm::vec3(0,0,-10), glm::vec3(0.7f, 0, 0));
-	Sphere* bigSphere = new Sphere(100, glm::vec3(0, -125, -25), glm::vec3(0, 0.4f, 0));
+	Sphere* bigSphere = new Sphere(100, glm::vec3(0, -105, -25), glm::vec3(0, 0.4f, 0));
 
 	scene.push_back(redSphere);
 	scene.push_back(blueSphere);
@@ -46,8 +46,11 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 /// <summary>
 /// Render every pixel that makes up the viewport of the image
 /// </summary>
-void Renderer::Render() {
-	
+void Renderer::Render(const Camera& camera) {
+
+	Ray ray;
+	ray.origin = camera.GetPosition();
+
 	float aspectRatio = m_FinalImage->GetWidth() / (float)m_FinalImage->GetHeight();
 	//loop through ys on the outside to be more friendly to the cpu cache
 	//cpu can seach through the horizontally placed pixels faster
@@ -55,10 +58,8 @@ void Renderer::Render() {
 	{
 		for (uint32_t x = 0; x < m_FinalImage->GetWidth(); x++) 
 		{
-			glm::vec2 coord = { (float)x / (float)m_FinalImage->GetWidth(), (float)y / (float)m_FinalImage->GetHeight() };
-			coord = coord * 2.0f - 1.0f; // -1 -> 1
-			coord.x *= aspectRatio;
-			glm::vec4 color = PerPixel(coord);
+			ray.direction = camera.GetRayDirections()[x + y * m_FinalImage->GetWidth()];
+			glm::vec4 color = TraceRay(ray);
 			color = glm::clamp(color, glm::vec4(0), glm::vec4(1.0f));
 			m_ImageData[x + y * m_FinalImage->GetWidth()] = ConvertColorVectorToInt(color);
 
@@ -77,13 +78,8 @@ void Renderer::Render() {
 /// </summary>
 /// <param name="coord"></param>
 /// <returns>the color of the collision; red it there was a collision, black if there was not</returns>
-glm::vec4 Renderer::PerPixel(glm::vec2 coord)
+glm::vec4 Renderer::TraceRay(Ray& ray)
 {
-	//shoot a ray from the camera origin through one of the pixel "windows" of the 
-	glm::vec3 origin = glm::vec3(0, 0, 0);
-	glm::vec3 direction = glm::vec3(coord.x, coord.y, -1);
-	Ray ray = Ray(origin, direction);
-
 	//light values
 	float k_diffuse = 0.95f;
 	float k_ambient = 0.0f;

@@ -1,5 +1,10 @@
 #include "Ray.h"
 
+Ray::Ray() {
+	origin = glm::vec3(0, 0, 0);
+	direction = glm::vec3(0, 0, 1);
+}
+
 Ray::Ray(glm::vec3 o, glm::vec3 d)
 {
 	origin = o;
@@ -11,7 +16,7 @@ Ray::Ray(glm::vec3 o, glm::vec3 d)
 /// </summary>
 /// <param name="t"></param>
 /// <returns>the x and y components of a ray at a parameter t</returns>
-glm::vec3 Ray::CalculatePoint(float t)
+const glm::vec3 Ray::CalculatePoint(float t)
 {
 	return origin + direction * t;
 }

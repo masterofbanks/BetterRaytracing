@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "Hit.h"
 #include <vector>
+#include "Camera.h"
 
 /// <summary>
 /// Class that takes a scene description as an input, and produces the pixels of an image as an output.
@@ -26,7 +27,7 @@ public:
 	/// <summary>
 	/// Render every pixel that makes up the viewport of the image
 	/// </summary>
-	void Render();
+	void Render(const Camera& camera);
 
 	/// <summary>
 	/// Getter method for the final image of the render
@@ -42,7 +43,7 @@ private:
 	/// </summary>
 	/// <param name="coord"></param>
 	/// <returns>the color of the collision; red it there was a collision, black if there was not</returns>
-	glm::vec4 PerPixel(glm::vec2 coord);
+	glm::vec4 TraceRay(Ray& ray);
 
 	/// <summary>
 	/// Detects whether a ray has hit any object in the scene, and stores the closest result in a hit record (t value, point, and normal)
