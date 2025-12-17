@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "Walnut/Random.h"
 #include <iostream>
+#include <cmath>
 
 Renderer::Renderer()
 {
@@ -83,6 +84,9 @@ glm::vec4 Renderer::TraceRay(Ray& ray)
 	//light values
 	float k_diffuse = 0.95f;
 	float k_ambient = 0.0f;
+	float k_phong = 0.95f;
+	int phongExponent = 32;
+	glm::vec3 colorOfLight = glm::vec3(1, 1, 1);
 	
 	glm::vec3 lightOrigin = glm::vec3(3, 3, 5);
 
@@ -92,8 +96,19 @@ glm::vec4 Renderer::TraceRay(Ray& ray)
 	float maxCheckDistance = 999999999.0f;
 	if (HitScene(ray, minimumCheckDistance, maxCheckDistance, tempHitRecord)) {
 		glm::vec3 vectorToLight = glm::normalize(lightOrigin - tempHitRecord.p);
-		float fallOffFactor = std::max(0.0f, glm::dot(tempHitRecord.normal, vectorToLight));
-		glm::vec3 outputColor = k_ambient * tempHitRecord.colorOfHit + (k_diffuse * fallOffFactor) * tempHitRecord.colorOfHit;
+
+		//diffuse shading factor = k_f * n • l
+		float diffuseFactor = k_diffuse * std::max(0.0f, glm::dot(tempHitRecord.normal, vectorToLight));
+
+		//e = vector to camera from hit point
+		//h = half vector = (e + l)/||e + l||
+		glm::vec3 e = ray.origin - tempHitRecord.p;
+		glm::vec3 h = (e + vectorToLight) / glm::length(e + vectorToLight);
+
+		//phong shading factor = k_p * (h • n)^p
+		float phongShading = k_phong * std::pow(glm::dot(h, tempHitRecord.normal), phongExponent);
+
+		glm::vec3 outputColor = (k_ambient + diffuseFactor ) * tempHitRecord.colorOfHit + phongShading * colorOfLight;
 		return glm::vec4(outputColor, 1);
 
 	}
