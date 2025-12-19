@@ -17,6 +17,21 @@ Renderer::Renderer()
 	scene.push_back(blueSphere);
 	//scene.push_back(bigSphere);
 
+
+
+	glm::vec3 colorOfLight = glm::vec3(1, 1, 1);
+	glm::vec3 lightOrigin = glm::vec3(10000, 10000, 10000);
+	Light* light = new Light(colorOfLight, lightOrigin);
+
+	glm::vec3 secondLightColor = glm::vec3(1, 1, 1);
+	glm::vec3 secondLightOrigin = glm::vec3(-10000, 10000, 10000);
+	Light* secondLight = new Light(secondLightColor, secondLightOrigin);
+
+	lights.push_back(light);
+	lights.push_back(secondLight);
+
+
+
 }
 
 /// <summary>
@@ -84,39 +99,40 @@ void Renderer::Render(const Camera& camera) {
 /// <returns>the color of the collision; black if there was not any collision</returns>
 glm::vec4 Renderer::TraceRay(Ray& ray)
 {
+	
 	//light values
 	float k_ambient = 0.0f;
 	int phongExponent = 256;
-	glm::vec3 colorOfLight = glm::vec3(1, 1, 1);
-	
-	glm::vec3 lightOrigin = glm::vec3(10000, 10000, 10000);
-
 	
 	Hit tempHitRecord;
 	float minimumCheckDistance = 0.001f;
 	float maxCheckDistance = 999999999.0f;
 	if (HitScene(ray, minimumCheckDistance, maxCheckDistance, tempHitRecord)) {
-		glm::vec3 vectorToLight = glm::normalize(lightOrigin - tempHitRecord.p);
+		glm::vec3 outputColor = glm::vec3();
+		for (int i = 0; i < lights.size(); i++) {
+			glm::vec3 vectorToLight = glm::normalize(lights[i]->GetOrigin() - tempHitRecord.p);
 
-		//diffuse shading factor = k_f * n • l
-		float diffuseFactor = tempHitRecord.material.k_diffuse * std::max(0.0f, glm::dot(tempHitRecord.normal, vectorToLight));
+			//diffuse shading factor = k_f * n • l
+			float diffuseFactor = tempHitRecord.material.k_diffuse * std::max(0.0f, glm::dot(tempHitRecord.normal, vectorToLight));
 
-		//e = vector to camera from hit point
-		//h = half vector = (e + l)/||e + l||
-		glm::vec3 e = ray.origin - tempHitRecord.p;
-		glm::vec3 h = glm::normalize(e + vectorToLight);
+			//e = vector to camera from hit point
+			//h = half vector = (e + l)/||e + l||
+			glm::vec3 e = ray.origin - tempHitRecord.p;
+			glm::vec3 h = glm::normalize(e + vectorToLight);
 
-		//r = -l + 2(l • n)n
-		glm::vec3 r = -vectorToLight + 2 * glm::dot(vectorToLight, tempHitRecord.normal) * tempHitRecord.normal;
-		r = glm::normalize(r);
+			//r = -l + 2(l • n)n
+			glm::vec3 r = -vectorToLight + 2 * glm::dot(vectorToLight, tempHitRecord.normal) * tempHitRecord.normal;
+			r = glm::normalize(r);
 
-		//phong shading factor = k_p * (h • n)^p
-		float phongShading = tempHitRecord.material.k_phong * std::pow(glm::dot(h, tempHitRecord.normal), phongExponent);
+			//phong shading factor = k_p * (h • n)^p
+			float phongShading = tempHitRecord.material.k_phong * std::pow(glm::dot(h, tempHitRecord.normal), phongExponent);
 
-		//other phong shading factor = k_p * max(0,e • r)^p
-		//float phongShading = k_phong * std::pow(std::max(0.0f, glm::dot(e, r)), phongExponent);
+			//other phong shading factor = k_p * max(0,e • r)^p
+			//float phongShading = k_phong * std::pow(std::max(0.0f, glm::dot(e, r)), phongExponent);
 
-		glm::vec3 outputColor = (k_ambient + diffuseFactor ) * tempHitRecord.material.albedo + phongShading * colorOfLight;
+			outputColor += (k_ambient + diffuseFactor) * tempHitRecord.material.albedo + phongShading * lights[i]->GetAlbedo();
+		}
+		
 		return glm::vec4(outputColor, 1);
 
 	}

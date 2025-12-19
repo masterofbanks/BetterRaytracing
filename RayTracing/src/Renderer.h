@@ -7,6 +7,7 @@
 #include "Hit.h"
 #include <vector>
 #include "Camera.h"
+#include "Light.h"
 
 /// <summary>
 /// Class that takes a scene description as an input, and produces the pixels of an image as an output.
@@ -63,4 +64,6 @@ private:
 	std::shared_ptr<Walnut::Image> m_FinalImage;
 	uint32_t* m_ImageData = nullptr;
 	std::vector<Surface*> scene;
+	std::vector<Light*> lights;
+
 };
