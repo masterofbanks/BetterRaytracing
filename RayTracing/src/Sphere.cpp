@@ -1,6 +1,11 @@
 #include "Sphere.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+Sphere::Sphere()
+{
+	radius = 0.3f;
+	center = glm::vec3(0);
+}
 Sphere::Sphere(float r, glm::vec3 cent, Material& m)
 {
 	radius = r;
@@ -40,14 +45,12 @@ bool Sphere::DetectHit(Ray& ray, float t_min, float t_max, Hit& hitRecord)
 
 void Sphere::DisplayValuesInEditor(int index)
 {
-	ImGui::Begin("Scene");
 	ImGui::PushID(index);
 	ImGui::DragFloat3("Postition", glm::value_ptr(center), 0.1f);
-	ImGui::DragFloat("Radius", &radius, 0.1f, 0.001f);
+	ImGui::DragFloat("Radius", &radius, 0.1f, 0.001f, 300);
 	mat.DisplayValues();
 	ImGui::PopID();
 	ImGui::Separator();
-	ImGui::End();
 
 }
 

@@ -5,7 +5,7 @@ Material::Material()
 {
 	k_diffuse = 0.5f;
 	k_phong = 0.5f;
-	albedo = glm::vec3(1, 0, 0);
+	albedo = glm::vec3(1, 1, 1);
 }
 
 Material::Material(float k_d, float k_p, glm::vec3& a)

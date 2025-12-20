@@ -7,7 +7,8 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "glm/glm.hpp"
-
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 
 using namespace Walnut;
@@ -29,11 +30,22 @@ public:
 		{
 			Render();
 		}
+
+		if (ImGui::Button("New Sphere")) {
+			m_Renderer.AddSphereToScene();
+		}
 		ImGui::End();
+		
+		ImGui::Begin("Camera");
+		ImGui::DragFloat3("Camera Position", glm::value_ptr(m_Camera.m_Position), 0.1f);
+		ImGui::Separator();
 
 		for (int i = 0; i < m_Renderer.scene.size(); i++) {
 			m_Renderer.scene[i]->DisplayValuesInEditor(i);
 		}
+
+		ImGui::End();
+
 
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));

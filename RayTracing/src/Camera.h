@@ -6,6 +6,8 @@
 class Camera
 {
 public:
+	glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
+	
 	Camera(float verticalFOV, float nearClip, float farClip);
 
 	bool OnUpdate(float ts);
@@ -36,7 +38,6 @@ private:
 	float m_NearClip = 0.1f;
 	float m_FarClip = 100.0f;
 
-	glm::vec3 m_Position{0.0f, 0.0f, 0.0f};
 	glm::vec3 m_ForwardDirection{0.0f, 0.0f, 0.0f};
 
 	// Cached ray directions

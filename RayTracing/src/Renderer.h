@@ -42,6 +42,10 @@ public:
 		return m_FinalImage;
 	}
 
+	void AddSphereToScene() {
+		scene.push_back(new Sphere());
+	}
+
 private:
 	/// <summary>
 	/// For a given camera coordinate, see if a ray shot from the camera's origin through a pixel as hit a sphere located at 0,0,0
