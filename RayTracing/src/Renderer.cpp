@@ -28,7 +28,6 @@ Renderer::Renderer()
 	Light* secondLight = new Light(secondLightColor, secondLightOrigin);
 
 	lights.push_back(light);
-	lights.push_back(secondLight);
 
 
 

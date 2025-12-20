@@ -14,6 +14,10 @@
 /// </summary>
 class Renderer {
 public:
+	std::vector<Surface*> scene;
+	std::vector<Light*> lights;
+	
+	
 	Renderer();
 
 	/// <summary>
@@ -63,7 +67,6 @@ private:
 private:
 	std::shared_ptr<Walnut::Image> m_FinalImage;
 	uint32_t* m_ImageData = nullptr;
-	std::vector<Surface*> scene;
-	std::vector<Light*> lights;
+
 
 };

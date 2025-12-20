@@ -9,4 +9,5 @@ public:
 
 	Material();
 	Material(float k_d, float k_p, glm::vec3& a);
+	void DisplayValues();
 };

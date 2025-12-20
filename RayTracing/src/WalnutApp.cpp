@@ -6,6 +6,9 @@
 
 #include "Renderer.h"
 #include "Camera.h"
+#include "glm/glm.hpp"
+
+
 
 using namespace Walnut;
 class ExampleLayer : public Walnut::Layer
@@ -27,6 +30,11 @@ public:
 			Render();
 		}
 		ImGui::End();
+
+		for (int i = 0; i < m_Renderer.scene.size(); i++) {
+			m_Renderer.scene[i]->DisplayValuesInEditor(i);
+		}
+
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
