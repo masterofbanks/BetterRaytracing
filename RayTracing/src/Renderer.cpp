@@ -20,11 +20,11 @@ Renderer::Renderer()
 
 
 	glm::vec3 colorOfLight = glm::vec3(1, 1, 1);
-	glm::vec3 lightOrigin = glm::vec3(10000, 10000, 10000);
+	glm::vec3 lightOrigin = glm::vec3(10, 10, 10);
 	Light* light = new Light(colorOfLight, lightOrigin);
 
 	glm::vec3 secondLightColor = glm::vec3(1, 1, 1);
-	glm::vec3 secondLightOrigin = glm::vec3(-10000, 10000, 10000);
+	glm::vec3 secondLightOrigin = glm::vec3(-10, 10, 10);
 	Light* secondLight = new Light(secondLightColor, secondLightOrigin);
 
 	lights.push_back(light);

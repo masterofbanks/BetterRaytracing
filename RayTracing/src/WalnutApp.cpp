@@ -36,7 +36,7 @@ public:
 		}
 		ImGui::End();
 		
-		ImGui::Begin("Camera");
+		ImGui::Begin("Components");
 		ImGui::DragFloat3("Camera Position", glm::value_ptr(m_Camera.m_Position), 0.1f);
 		ImGui::Separator();
 
@@ -44,6 +44,9 @@ public:
 			m_Renderer.scene[i]->DisplayValuesInEditor(i);
 		}
 
+		for (int i = 0; i < m_Renderer.lights.size(); i++) {
+			m_Renderer.lights[i]->DisplayValuesInEditor(i);
+		}
 		ImGui::End();
 
 
